@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market OS</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- html2pdf Library for High Quality PDF Invoices -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Ambient Glow BG -->
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- 3D Shopping Bag Loading Screen -->
+    <div id="loader">
+        <div class="bag-3d-wrapper">
+            <div class="bag-3d">
+                <div class="bag-handle"></div>
+                <div class="bag-body"></div>
+            </div>
+        </div>
+        <div class="loader-logo">MARKET OS</div>
+    </div>
+
+    <!-- Main App UI -->
+    <div class="app-container" id="app">
+        <header>
+            <div class="logo-box">
+                <!-- Custom Modern Vector SVG Logo -->
+                <svg class="brand-logo-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                    <path d="M3 6h18"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+                <div class="brand-title">
+                    <h1>Market OS</h1>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <!-- Invoice Drawer Trigger Button -->
+                <button class="btn-bill-drawer" onclick="toggleDrawer(true)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span>Bill / PDF Invoice</span>
+                </button>
+
+                <!-- Animated Tab Switcher -->
+                <div class="tab-group" id="tabGroup">
+                    <div class="tab-indicator" id="tabIndicator"></div>
+                    <button class="tab-btn active" onclick="switchTab(this, 'all')">All Notes</button>
+                    <button class="tab-btn" onclick="switchTab(this, 'today')">Today</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Form -->
+        <div class="form-card">
+            <form id="marketForm" onsubmit="addEntries(event)">
+                <div class="input-group">
+                    <label>Where (Store / Mall Name)</label>
+                    <input type="text" id="shopName" class="input-control" placeholder="e.g. Shop Mall / Agora" required>
+                </div>
+
+                <div id="itemRowsContainer">
+                    <div class="item-row">
+                        <input type="text" class="input-control item-name" list="itemPresets" placeholder="Item Name (e.g. Rice)" required>
+                        <input type="text" class="input-control item-qty" placeholder="Qty (e.g. 5 kg, 2 L)" required>
+                        <input type="number" step="0.01" class="input-control item-price" placeholder="Price ($/?)" required>
+                        <button type="button" class="btn-remove-row" onclick="removeRow(this)" title="Remove Row">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <datalist id="itemPresets">
+                    <option value="Rice"><option value="Milk"><option value="Potato">
+                    <option value="Onion"><option value="Cooking Oil"><option value="Eggs">
+                </datalist>
+
+                <button type="button" class="btn-add-row" onclick="addItemRow()">+ Add Another Item</button>
+                <button type="submit" class="btn-submit">Save All Items</button>
+            </form>
+        </div>
+
+        <div class="content-area">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 style="font-size: 1.1rem; font-weight: 600;">Recent Purchases</h2>
+                </div>
+
+                <!-- Live Search Bar Filter -->
+                <div class="search-box-wrapper">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="searchQuery" class="search-input" placeholder="Search by Shop Name or Item (e.g. Agora, Rice)..." oninput="renderEntries()">
+                </div>
+
+                <div id="entryContainer"></div>
+            </div>
+
+            <div class="summary-card">
+                <h3 style="font-size: 1rem; font-weight: 600;">Overview</h3>
+                <div class="stat-box">
+                    <div class="stat-label">Total Expenditure</div>
+                    <div class="stat-val" id="totalExpense">$0.00</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Logged Items</div>
+                    <div class="stat-val" id="totalItems">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side Invoice Drawer -->
+    <div class="invoice-drawer-overlay" id="drawerOverlay" onclick="toggleDrawer(false)"></div>
+    <div class="invoice-drawer" id="invoiceDrawer">
+        <div>
+            <div class="drawer-header">
+                <h3 style="font-weight: 700; color: #fff;">Filter Invoice PDF</h3>
+                <!-- Clean Vector SVG Close Icon -->
+                <button class="btn-close-drawer" onclick="toggleDrawer(false)" title="Close Panel">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Filter by shop name or purchase date to print a formal invoice.</p>
+
+            <div class="input-group">
+                <label>Select Shop / Store</label>
+                <select id="filterShopSelect" class="input-control" style="background: #181724;">
+                    <option value="">All Shops</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Filter Date</label>
+                <input type="date" id="filterDateSelect" class="input-control">
+            </div>
+        </div>
+
+        <button class="btn-generate-pdf" onclick="generatePDF()">Download Professional PDF Invoice</button>
+    </div>
+
+    <!-- Hidden Export Printable PDF Template -->
+    <div id="pdfTemplate">
+        <div class="pdf-header">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    <h1 style="font-size: 1.4rem; color: #0f172a; margin: 0;">MARKET OS</h1>
+                </div>
+                <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Official Purchase & Procurement Statement</p>
+            </div>
+            <div style="text-align: right;">
+                <h2 style="font-size: 1.2rem; color: #6366f1; margin: 0;">INVOICE</h2>
+                <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;" id="pdfInvoiceMeta">Date: --</p>
+            </div>
+        </div>
+
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th>Item Description</th>
+                    <th>Store / Shop</th>
+                    <th>Quantity</th>
+                    <th style="text-align: right;">Price</th>
+                </tr>
+            </thead>
+            <tbody id="pdfTableBody">
+                <!-- PDF Items Injected Here -->
+            </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+            <div>
+                <p style="font-size: 0.8rem; color: #94a3b8;">Authorized Signatory</p>
+                <div style="margin-top: 30px; border-bottom: 1px solid #cbd5e1; width: 140px;"></div>
+            </div>
+            <div style="text-align: right;">
+                <p style="font-size: 0.9rem; color: #64748b;">Total Amount Paid:</p>
+                <h2 style="font-size: 1.8rem; color: #0f172a;" id="pdfGrandTotal">$0.00</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
