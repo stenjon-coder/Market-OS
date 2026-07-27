@@ -15,7 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
             app.style.opacity = '1';
             app.style.transform = 'scale(1)';
         }
-    }, 1000);
+    }, 800);
 
     updateTabIndicator();
     renderEntries();
@@ -112,7 +112,7 @@ function renderEntries() {
     }
 
     if (filtered.length === 0) {
-        list.innerHTML = `<div class="empty-state">No records found.</div>`;
+        list.innerHTML = `<div class="empty-state">No records found. Add your first entry above!</div>`;
         updateSummary(0, 0);
         populateBillSelect([]);
         return;
@@ -136,7 +136,7 @@ function renderEntries() {
                         <span class="entry-tag">${entry.items.length} items</span>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                     <div class="price-amount">₹${entry.total.toFixed(2)}</div>
                     <button class="btn-delete" onclick="deleteEntry(${entry.id})">🗑️</button>
                 </div>
@@ -261,7 +261,7 @@ async function downloadPDF() {
 
     const fileName = `Market_Notes_${entry.customerName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
 
-    // Option A: Use File Picker API (Works on PC Desktop Chrome/Edge for Custom Folder Saving)
+    // Option A: File Picker API for Custom Folder Selection (PC Chrome/Edge)
     if ('showSaveFilePicker' in window) {
         try {
             const handle = await window.showSaveFilePicker({
@@ -294,7 +294,7 @@ async function downloadPDF() {
         }
     }
 
-    // Option B: Standard Browser Download Fallback
+    // Option B: Standard Browser Download Fallback (Mobile App/Browsers)
     const opt = {
         margin:       10,
         filename:     fileName,
