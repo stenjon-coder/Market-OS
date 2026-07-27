@@ -1,3 +1,4 @@
+// LocalStorage variables & State Initialization
 let entries = JSON.parse(localStorage.getItem('market_os_entries')) || [];
 let activeTab = 'all';
 
@@ -6,17 +7,21 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const loader = document.getElementById('loader');
         const app = document.getElementById('appContainer');
-        loader.style.opacity = '0';
-        loader.style.visibility = 'hidden';
-        app.style.opacity = '1';
-        app.style.transform = 'scale(1)';
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+        }
+        if (app) {
+            app.style.opacity = '1';
+            app.style.transform = 'scale(1)';
+        }
     }, 1000);
 
     updateTabIndicator();
     renderEntries();
 });
 
-// Dynamic Item Rows
+// Dynamic Item Rows Management
 function addItemRow() {
     const container = document.getElementById('itemsContainer');
     const row = document.createElement('div');
@@ -96,7 +101,8 @@ function saveEntry() {
 // Render Saved Entries List
 function renderEntries() {
     const list = document.getElementById('entriesList');
-    const searchVal = document.getElementById('searchInput').value.toLowerCase();
+    const searchInput = document.getElementById('searchInput');
+    const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
     
     let filtered = entries.filter(e => e.customerName.toLowerCase().includes(searchVal));
 
@@ -193,6 +199,7 @@ function toggleDrawer(open) {
 
 function populateBillSelect(data) {
     const select = document.getElementById('billSelect');
+    if (!select) return;
     select.innerHTML = '<option value="">-- Choose Entry --</option>';
     data.forEach(entry => {
         select.innerHTML += `<option value="${entry.id}">${escapeHtml(entry.customerName)} - ₹${entry.total.toFixed(2)}</option>`;
@@ -222,7 +229,7 @@ function previewBill() {
 }
 
 // Professional PDF Download Function
-function downloadPDF() {
+async function downloadPDF() {
     const selectedId = document.getElementById('billSelect').value;
     if (!selectedId) {
         alert('Please select an entry to download PDF bill.');
@@ -252,9 +259,45 @@ function downloadPDF() {
     const element = document.getElementById('pdfTemplate');
     element.style.display = 'block';
 
+    const fileName = `Market_Notes_${entry.customerName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
+
+    // Option A: Use File Picker API (Works on PC Desktop Chrome/Edge for Custom Folder Saving)
+    if ('showSaveFilePicker' in window) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: fileName,
+                types: [{
+                    description: 'PDF Document',
+                    accept: { 'application/pdf': ['.pdf'] },
+                }],
+            });
+
+            const pdfBlob = await html2pdf().set({
+                margin: 10,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(element).output('blob');
+
+            const writable = await handle.createWritable();
+            await writable.write(pdfBlob);
+            await writable.close();
+
+            element.style.display = 'none';
+            toggleDrawer(false);
+            return;
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                element.style.display = 'none';
+                return;
+            }
+        }
+    }
+
+    // Option B: Standard Browser Download Fallback
     const opt = {
         margin:       10,
-        filename:     `Market_OS_Invoice_${entry.customerName.replace(/\s+/g, '_')}.pdf`,
+        filename:     fileName,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -266,6 +309,7 @@ function downloadPDF() {
     });
 }
 
+// Helper Function: Sanitize HTML String
 function escapeHtml(text) {
     return String(text).replace(/[&<"']/g, function(m) {
         return { '&': '&amp;', '<': '&lt;', '"': '&quot;', "'": '&#039;' }[m];
