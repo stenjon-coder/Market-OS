@@ -1,38 +1,33 @@
-// Opening Sequence
+let entries = JSON.parse(localStorage.getItem('market_os_entries')) || [];
+let activeTab = 'all';
+
+// App Initialization
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const loader = document.getElementById('loader');
-        const app = document.getElementById('app');
-        
+        const app = document.getElementById('appContainer');
         loader.style.opacity = '0';
         loader.style.visibility = 'hidden';
-        
         app.style.opacity = '1';
         app.style.transform = 'scale(1)';
-        
-        updateTabIndicator(document.querySelector('.tab-btn.active'));
-    }, 1800);
-    
+    }, 1000);
+
+    updateTabIndicator();
     renderEntries();
 });
 
-let entries = JSON.parse(localStorage.getItem('market_entries')) || [];
-let currentFilter = 'all';
-
-// Add dynamic item row
+// Dynamic Item Rows
 function addItemRow() {
-    const container = document.getElementById('itemRowsContainer');
-    const newRow = document.createElement('div');
-    newRow.className = 'item-row';
-    newRow.innerHTML = `
-        <input type="text" class="input-control item-name" list="itemPresets" placeholder="Item Name (e.g. Milk)" required>
-        <input type="text" class="input-control item-qty" placeholder="Qty (e.g. 1 L, 2 Pcs)" required>
-        <input type="number" step="0.01" class="input-control item-price" placeholder="Price ($/?)" required>
-        <button type="button" class="btn-remove-row" onclick="removeRow(this)" title="Remove Row">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-        </button>
+    const container = document.getElementById('itemsContainer');
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+        <input type="text" class="input-control item-name" placeholder="Item description (e.g. Milk)">
+        <input type="text" class="input-control item-qty" placeholder="Qty (e.g. 1 L)" value="1 Pcs">
+        <input type="number" step="0.01" class="input-control item-price" placeholder="Price (₹)">
+        <button class="btn-remove-row" onclick="removeRow(this)">✕</button>
     `;
-    container.appendChild(newRow);
+    container.appendChild(row);
 }
 
 function removeRow(btn) {
@@ -40,16 +35,154 @@ function removeRow(btn) {
     if (rows.length > 1) {
         btn.closest('.item-row').remove();
     } else {
-        alert('At least one item row is required!');
+        alert('At least one item is required.');
     }
 }
 
-// Toggle Right Drawer Panel
+// Save Entry Function
+function saveEntry() {
+    const customerName = document.getElementById('customerName').value.trim();
+    const itemRows = document.querySelectorAll('.item-row');
+    
+    if (!customerName) {
+        alert('Please enter a Customer or Store Name.');
+        return;
+    }
+
+    let items = [];
+    let total = 0;
+
+    itemRows.forEach(row => {
+        const name = row.querySelector('.item-name').value.trim();
+        const qty = row.querySelector('.item-qty').value.trim() || '1 Pcs';
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+
+        if (name && price > 0) {
+            total += price;
+            items.push({ name, qty, price });
+        }
+    });
+
+    if (items.length === 0) {
+        alert('Please add at least one valid item with a price.');
+        return;
+    }
+
+    const newEntry = {
+        id: Date.now(),
+        customerName,
+        items,
+        total,
+        date: new Date().toISOString()
+    };
+
+    entries.unshift(newEntry);
+    localStorage.setItem('market_os_entries', JSON.stringify(entries));
+
+    // Reset Form
+    document.getElementById('customerName').value = '';
+    document.getElementById('itemsContainer').innerHTML = `
+        <div class="item-row">
+            <input type="text" class="input-control item-name" placeholder="Item description (e.g. Rice)">
+            <input type="text" class="input-control item-qty" placeholder="Qty (e.g. 2 kg / 1 pc)" value="1 Pcs">
+            <input type="number" step="0.01" class="input-control item-price" placeholder="Price (₹)">
+            <button class="btn-remove-row" onclick="removeRow(this)">✕</button>
+        </div>
+    `;
+
+    renderEntries();
+}
+
+// Render Saved Entries List
+function renderEntries() {
+    const list = document.getElementById('entriesList');
+    const searchVal = document.getElementById('searchInput').value.toLowerCase();
+    
+    let filtered = entries.filter(e => e.customerName.toLowerCase().includes(searchVal));
+
+    if (activeTab === 'today') {
+        const todayStr = new Date().toDateString();
+        filtered = filtered.filter(e => new Date(e.date).toDateString() === todayStr);
+    }
+
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state">No records found.</div>`;
+        updateSummary(0, 0);
+        populateBillSelect([]);
+        return;
+    }
+
+    let html = '';
+    let grandTotal = 0;
+
+    filtered.forEach(entry => {
+        grandTotal += entry.total;
+        const formattedDate = new Date(entry.date).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'short', year: 'numeric'
+        });
+
+        html += `
+            <div class="entry-card">
+                <div class="entry-info">
+                    <div class="entry-title">${escapeHtml(entry.customerName)}</div>
+                    <div class="entry-meta">
+                        <span>📅 ${formattedDate}</span>
+                        <span class="entry-tag">${entry.items.length} items</span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div class="price-amount">₹${entry.total.toFixed(2)}</div>
+                    <button class="btn-delete" onclick="deleteEntry(${entry.id})">🗑️</button>
+                </div>
+            </div>
+        `;
+    });
+
+    list.innerHTML = html;
+    updateSummary(grandTotal, filtered.length);
+    populateBillSelect(entries);
+}
+
+function deleteEntry(id) {
+    if (confirm('Are you sure you want to delete this record?')) {
+        entries = entries.filter(e => e.id !== id);
+        localStorage.setItem('market_os_entries', JSON.stringify(entries));
+        renderEntries();
+    }
+}
+
+function updateSummary(total, count) {
+    document.getElementById('grandTotal').innerText = `₹${total.toFixed(2)}`;
+    document.getElementById('totalEntriesCount').innerText = count;
+}
+
+// Tab Switching Mechanics
+function switchTab(btn, tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateTabIndicator();
+    renderEntries();
+}
+
+function updateTabIndicator() {
+    const activeBtn = document.querySelector('.tab-btn.active');
+    const indicator = document.getElementById('tabIndicator');
+    if (activeBtn && indicator) {
+        indicator.style.left = `${activeBtn.offsetLeft}px`;
+        indicator.style.width = `${activeBtn.offsetWidth}px`;
+    }
+}
+
+function filterEntries() {
+    renderEntries();
+}
+
+// Bill Side Drawer Functionalities
 function toggleDrawer(open) {
     const overlay = document.getElementById('drawerOverlay');
     const drawer = document.getElementById('invoiceDrawer');
     if (open) {
-        populateShopSelect();
         overlay.classList.add('active');
         drawer.classList.add('active');
     } else {
@@ -58,179 +191,70 @@ function toggleDrawer(open) {
     }
 }
 
-function populateShopSelect() {
-    const select = document.getElementById('filterShopSelect');
-    const shops = [...new Set(entries.map(e => e.shop))];
-    select.innerHTML = '<option value="">All Shops</option>';
-    shops.forEach(s => {
-        select.innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+function populateBillSelect(data) {
+    const select = document.getElementById('billSelect');
+    select.innerHTML = '<option value="">-- Choose Entry --</option>';
+    data.forEach(entry => {
+        select.innerHTML += `<option value="${entry.id}">${escapeHtml(entry.customerName)} - ₹${entry.total.toFixed(2)}</option>`;
     });
 }
 
-function switchTab(element, filterMode) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    element.classList.add('active');
-    updateTabIndicator(element);
-    currentFilter = filterMode;
-    renderEntries();
-}
-
-function updateTabIndicator(element) {
-    const indicator = document.getElementById('tabIndicator');
-    if (element && indicator) {
-        indicator.style.width = `${element.offsetWidth}px`;
-        indicator.style.left = `${element.offsetLeft}px`;
-    }
-}
-
-function addEntries(e) {
-    e.preventDefault();
-    const shop = document.getElementById('shopName').value;
-    const rows = document.querySelectorAll('.item-row');
-    const timeStamp = new Date().toISOString();
-
-    rows.forEach(row => {
-        entries.unshift({
-            id: Date.now() + Math.random(),
-            shop: shop,
-            item: row.querySelector('.item-name').value,
-            qty: row.querySelector('.item-qty').value,
-            price: parseFloat(row.querySelector('.item-price').value),
-            date: timeStamp
-        });
-    });
-
-    saveAndRender();
-    document.getElementById('marketForm').reset();
-    document.getElementById('itemRowsContainer').innerHTML = `
-        <div class="item-row">
-            <input type="text" class="input-control item-name" list="itemPresets" placeholder="Item Name (e.g. Rice)" required>
-            <input type="text" class="input-control item-qty" placeholder="Qty (e.g. 5 kg, 2 L)" required>
-            <input type="number" step="0.01" class="input-control item-price" placeholder="Price ($/?)" required>
-            <button type="button" class="btn-remove-row" onclick="removeRow(this)" title="Remove Row">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-            </button>
-        </div>
-    `;
-}
-
-function deleteEntry(id) {
-    entries = entries.filter(item => item.id !== id);
-    saveAndRender();
-}
-
-function saveAndRender() {
-    localStorage.setItem('market_entries', JSON.stringify(entries));
-    renderEntries();
-}
-
-// Render & Real-time Search Filtering Function
-function renderEntries() {
-    const container = document.getElementById('entryContainer');
-    const searchQuery = document.getElementById('searchQuery') ? document.getElementById('searchQuery').value.toLowerCase().trim() : '';
-    container.innerHTML = '';
-
-    let filtered = entries;
-
-    // Date Tab Filter
-    if (currentFilter === 'today') {
-        const todayStr = new Date().toDateString();
-        filtered = entries.filter(item => new Date(item.date).toDateString() === todayStr);
-    }
-
-    // Real-Time Search Filter (Shop Name & Item Name)
-    if (searchQuery !== '') {
-        filtered = filtered.filter(item => 
-            item.shop.toLowerCase().includes(searchQuery) || 
-            item.item.toLowerCase().includes(searchQuery)
-        );
-    }
-
-    if (filtered.length === 0) {
-        container.innerHTML = `<div class="empty-state">No matching items or notes found!</div>`;
-        updateAnalytics(filtered);
+function previewBill() {
+    const selectedId = document.getElementById('billSelect').value;
+    const previewBox = document.getElementById('drawerPreview');
+    
+    if (!selectedId) {
+        previewBox.innerHTML = 'Select an entry above to view invoice summary.';
         return;
     }
 
-    filtered.forEach(entry => {
-        const dateFormatted = new Date(entry.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        const card = document.createElement('div');
-        card.className = 'entry-card';
-        card.innerHTML = `
-            <div class="entry-info">
-                <div class="entry-title">${escapeHtml(entry.item)}</div>
-                <div class="entry-meta">
-                    <span class="entry-tag">${escapeHtml(entry.shop)}</span>
-                    <span>Qty: ${escapeHtml(entry.qty)}</span>
-                    <span>• ${dateFormatted}</span>
-                </div>
-            </div>
-            <div style="display: flex; align-items: center;">
-                <div class="price-amount">$${entry.price.toFixed(2)}</div>
-                <button class="btn-delete" onclick="deleteEntry(${entry.id})" title="Delete Item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                </button>
+    const entry = entries.find(e => e.id == selectedId);
+    if (entry) {
+        let itemsHtml = entry.items.map(i => `<div style="display:flex; justify-content:space-between; margin-top:6px;"><span>${escapeHtml(i.name)} (${escapeHtml(i.qty)})</span><span>₹${i.price.toFixed(2)}</span></div>`).join('');
+        previewBox.innerHTML = `
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid var(--card-border);">
+                <strong style="color: #fff;">${escapeHtml(entry.customerName)}</strong>
+                <div style="margin-top: 10px; border-top: 1px solid var(--card-border); padding-top: 8px;">${itemsHtml}</div>
+                <div style="margin-top: 12px; text-align: right; font-weight: bold; color: #fff;">Total: ₹${entry.total.toFixed(2)}</div>
             </div>
         `;
-        container.appendChild(card);
-    });
-
-    updateAnalytics(filtered);
+    }
 }
 
-function updateAnalytics(data) {
-    const totalSum = data.reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('totalExpense').innerText = `$${totalSum.toFixed(2)}`;
-    document.getElementById('totalItems').innerText = data.length;
-}
-
-// Generate Professional PDF Invoice
-function generatePDF() {
-    const selectedShop = document.getElementById('filterShopSelect').value;
-    const selectedDate = document.getElementById('filterDateSelect').value;
-
-    let invoiceItems = entries;
-
-    if (selectedShop) {
-        invoiceItems = invoiceItems.filter(e => e.shop === selectedShop);
-    }
-
-    if (selectedDate) {
-        const targetDateStr = new Date(selectedDate).toDateString();
-        invoiceItems = invoiceItems.filter(e => new Date(e.date).toDateString() === targetDateStr);
-    }
-
-    if (invoiceItems.length === 0) {
-        alert('No items found matching the selected filter!');
+// Professional PDF Download Function
+function downloadPDF() {
+    const selectedId = document.getElementById('billSelect').value;
+    if (!selectedId) {
+        alert('Please select an entry to download PDF bill.');
         return;
     }
 
-    // Populate PDF Template
+    const entry = entries.find(e => e.id == selectedId);
+    
+    // Inject Info into Printable Template
     const tableBody = document.getElementById('pdfTableBody');
     tableBody.innerHTML = '';
-    let grandTotal = 0;
 
-    invoiceItems.forEach(item => {
-        grandTotal += item.price;
+    entry.items.forEach(item => {
         tableBody.innerHTML += `
             <tr>
-                <td><strong>${escapeHtml(item.item)}</strong></td>
-                <td>${escapeHtml(item.shop)}</td>
+                <td><strong>${escapeHtml(item.name)}</strong></td>
+                <td>${escapeHtml(entry.customerName)}</td>
                 <td>${escapeHtml(item.qty)}</td>
-                <td style="text-align: right;">$${item.price.toFixed(2)}</td>
+                <td style="text-align: right;">₹${item.price.toFixed(2)}</td>
             </tr>
         `;
     });
 
-    document.getElementById('pdfGrandTotal').innerText = `$${grandTotal.toFixed(2)}`;
-    document.getElementById('pdfInvoiceMeta').innerText = `Date: ${new Date().toLocaleDateString()} | Ref: #INV-${Math.floor(1000 + Math.random() * 9000)}`;
+    document.getElementById('pdfGrandTotal').innerText = `₹${entry.total.toFixed(2)}`;
+    document.getElementById('pdfInvoiceMeta').innerText = `Date: ${new Date(entry.date).toLocaleDateString()} | Ref: #INV-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const element = document.getElementById('pdfTemplate');
     element.style.display = 'block';
 
     const opt = {
         margin:       10,
-        filename:     `Market_OS_Invoice_${Date.now()}.pdf`,
+        filename:     `Market_OS_Invoice_${entry.customerName.replace(/\s+/g, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -243,7 +267,7 @@ function generatePDF() {
 }
 
 function escapeHtml(text) {
-    return text.replace(/[&<"']/g, function(m) {
+    return String(text).replace(/[&<"']/g, function(m) {
         return { '&': '&amp;', '<': '&lt;', '"': '&quot;', "'": '&#039;' }[m];
     });
 }
