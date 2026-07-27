@@ -1,12 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Market OS</title>
+    
+    <!-- App Meta Tags (Full Screen Settings) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#08070b">
+    
+    <!-- PWA Manifest File -->
+    <link rel="manifest" href="manifest.json">
+    
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- html2pdf JS Library for Invoice Generation -->
+    
+    <!-- html2pdf JS Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -131,7 +142,7 @@
         <button class="btn-generate-pdf" onclick="downloadPDF()">Download Professional PDF Invoice</button>
     </div>
 
-    <!-- Professional Printable PDF Template -->
+    <!-- Printable PDF Template -->
     <div id="pdfTemplate">
         <div class="pdf-header">
             <div>
@@ -156,9 +167,7 @@
                     <th style="text-align: right;">Price</th>
                 </tr>
             </thead>
-            <tbody id="pdfTableBody">
-                <!-- Items injected dynamically via script -->
-            </tbody>
+            <tbody id="pdfTableBody"></tbody>
         </table>
 
         <div style="display: flex; justify-content: space-between; margin-top: 30px;">
