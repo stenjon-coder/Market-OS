@@ -16,17 +16,22 @@
     padding: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
 }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    min-height: 100vh;
-    overflow-x: hidden;
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 1rem;
+    align-items: flex-start;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 /* Ambient Animated Background */
@@ -125,28 +130,38 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* App Container */
+/* App Container - Auto fit for Mobile Devices */
 .app-container {
     width: 100%;
-    max-width: 1100px;
-    margin: 1rem auto;
+    max-width: 1000px;
+    min-height: 100vh;
+    margin: 0 auto;
     background: var(--card-glass);
     border: 1px solid var(--card-border);
-    border-radius: 28px;
+    border-radius: 0px;
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-    padding: 2rem;
+    padding: 1.2rem;
     opacity: 0;
-    transform: scale(0.96);
-    transition: opacity 1s ease, transform 1s ease;
+    transform: scale(0.98);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+@media (min-width: 768px) {
+    .app-container {
+        min-height: auto;
+        margin: 2rem auto;
+        border-radius: 28px;
+        padding: 2rem;
+    }
 }
 
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     flex-wrap: wrap;
     gap: 1rem;
 }
@@ -154,48 +169,49 @@ header {
 .logo-box {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
 }
 
 .brand-logo-svg {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(56,189,248,0.2));
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 14px;
-    padding: 8px;
+    border-radius: 12px;
+    padding: 6px;
 }
 
 .brand-title h1 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 700;
 }
 
 .header-actions {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
-    flex-wrap: wrap;
+    width: 100%;
+    justify-content: space-between;
+}
+
+@media (min-width: 650px) {
+    .header-actions { width: auto; }
 }
 
 .btn-bill-drawer {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 6px;
     background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(99, 102, 241, 0.2));
     border: 1px solid rgba(56, 189, 248, 0.4);
     color: #fff;
-    padding: 0.7rem 1.2rem;
+    padding: 0.6rem 1rem;
     border-radius: 14px;
     font-weight: 600;
     font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-bill-drawer:hover {
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
-    transform: translateY(-2px);
+    flex: 1;
 }
 
 .tab-group {
@@ -205,18 +221,21 @@ header {
     border: 1px solid var(--card-border);
     padding: 4px;
     border-radius: 16px;
+    flex: 1;
 }
 
 .tab-btn {
     position: relative;
     z-index: 2;
-    padding: 0.6rem 1.2rem;
+    padding: 0.6rem 0.8rem;
     border: none;
     background: transparent;
     color: var(--text-muted);
     font-weight: 600;
     font-size: 0.85rem;
     cursor: pointer;
+    flex: 1;
+    text-align: center;
     transition: color 0.3s;
 }
 
@@ -235,8 +254,8 @@ header {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--card-border);
     border-radius: 20px;
-    padding: 1.5rem;
-    margin-bottom: 2.5rem;
+    padding: 1.2rem;
+    margin-bottom: 1.8rem;
 }
 
 .input-group {
@@ -256,7 +275,7 @@ header {
 
 .input-control {
     width: 100%;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--card-border);
     padding: 0.8rem 1rem;
     border-radius: 12px;
@@ -272,24 +291,37 @@ header {
 }
 
 .item-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1.2fr 44px;
-    gap: 0.8rem;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 0.8rem;
+    border-radius: 14px;
+    border: 1px solid var(--card-border);
     margin-bottom: 0.8rem;
+}
+
+@media (min-width: 650px) {
+    .item-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1.2fr 44px;
+        background: transparent;
+        padding: 0;
+        border: none;
+    }
 }
 
 .btn-add-row {
     background: rgba(255, 255, 255, 0.05);
     border: 1px dashed var(--card-border);
     color: var(--text-main);
-    padding: 0.7rem;
+    padding: 0.75rem;
     border-radius: 12px;
     cursor: pointer;
     font-weight: 600;
     font-size: 0.85rem;
     width: 100%;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
 }
 
 .btn-remove-row, .btn-delete {
@@ -298,7 +330,7 @@ header {
     color: var(--danger);
     border-radius: 10px;
     height: 42px;
-    width: 44px;
+    width: 100%;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -306,9 +338,9 @@ header {
     transition: all 0.2s;
 }
 
-.btn-remove-row:hover, .btn-delete:hover {
-    background: var(--danger);
-    color: #fff;
+@media (min-width: 650px) {
+    .btn-remove-row { width: 44px; }
+    .btn-delete { width: 44px; }
 }
 
 .btn-submit {
@@ -349,8 +381,12 @@ header {
 
 .content-area {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 850px) {
+    .content-area { grid-template-columns: 2fr 1fr; }
 }
 
 .entry-card {
@@ -360,8 +396,16 @@ header {
     padding: 1.2rem;
     margin-bottom: 0.8rem;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (min-width: 500px) {
+    .entry-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
 }
 
 .entry-title { font-weight: 600; font-size: 1.05rem; }
@@ -373,10 +417,10 @@ header {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--card-border);
     border-radius: 20px;
-    padding: 1.5rem;
+    padding: 1.2rem;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.2rem;
     height: fit-content;
 }
 
@@ -399,7 +443,7 @@ header {
     -webkit-text-fill-color: transparent; 
 }
 
-.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+.empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); }
 
 /* Invoice Drawer */
 .invoice-drawer-overlay {
@@ -423,7 +467,7 @@ header {
     background: #0f0e17;
     border-left: 1px solid var(--card-border);
     z-index: 1001;
-    padding: 2rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -485,29 +529,3 @@ header {
 }
 
 .pdf-table th { background: #f8fafc; color: #475569; }
-
-/* Responsive Queries */
-@media (max-width: 850px) {
-    .content-area { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 650px) {
-    body { padding: 0.5rem; }
-    .app-container { padding: 1.2rem; border-radius: 20px; }
-    header { flex-direction: column; align-items: stretch; }
-    .header-actions { justify-content: space-between; }
-    .btn-bill-drawer, .tab-group { flex: 1; }
-    .tab-btn { flex: 1; text-align: center; }
-    
-    .item-row {
-        grid-template-columns: 1fr;
-        background: rgba(255, 255, 255, 0.02);
-        padding: 0.8rem;
-        border-radius: 14px;
-        border: 1px solid var(--card-border);
-    }
-    
-    .btn-remove-row { width: 100%; margin-top: 0.3rem; }
-    .entry-card { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .invoice-drawer { max-width: 100%; }
-}
