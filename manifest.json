@@ -1,0 +1,17 @@
+{
+    "short_name": "Market OS",
+    "name": "Market OS - Grocery & Billing App",
+    "icons": [
+      {
+        "src": "https://img.icons8.com/color/512/shopping-bag--v1.png",
+        "type": "image/png",
+        "sizes": "512x512",
+        "purpose": "any maskable"
+      }
+    ],
+    "start_url": "./index.html",
+    "background_color": "#08070b",
+    "theme_color": "#08070b",
+    "display": "standalone",
+    "orientation": "portrait"
+  }
