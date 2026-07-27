@@ -26,9 +26,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 1rem;
 }
 
-/* Ambient Animated Mesh Background */
+/* Ambient Animated Background */
 .ambient-bg {
     position: fixed;
     top: 0; left: 0;
@@ -55,7 +56,7 @@ body {
     100% { transform: translate(-40px, 80px) scale(0.95); }
 }
 
-/* 3D Market Shopping Bag Loader Screen */
+/* 3D Loader Screen */
 #loader {
     position: fixed;
     inset: 0;
@@ -65,7 +66,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+    transition: opacity 0.8s ease, visibility 0.8s;
 }
 
 .bag-3d-wrapper {
@@ -86,7 +87,6 @@ body {
     animation: rotateBag 4s infinite ease-in-out;
 }
 
-/* 3D Glass Shopping Bag Body */
 .bag-body {
     position: absolute;
     inset: 0;
@@ -94,10 +94,9 @@ body {
     border: 2px solid rgba(165, 180, 252, 0.8);
     border-radius: 12px;
     backdrop-filter: blur(12px);
-    box-shadow: 0 0 35px rgba(99, 102, 241, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 35px rgba(99, 102, 241, 0.5);
 }
 
-/* 3D Handles */
 .bag-handle {
     position: absolute;
     top: -24px;
@@ -108,7 +107,6 @@ body {
     border: 2px solid rgba(165, 180, 252, 0.9);
     border-bottom: none;
     border-radius: 18px 18px 0 0;
-    box-shadow: 0 -4px 12px rgba(99, 102, 241, 0.4);
 }
 
 @keyframes rotateBag {
@@ -122,6 +120,7 @@ body {
     font-weight: 800;
     letter-spacing: 6px;
     background: linear-gradient(135deg, #fff 30%, #a5b4fc);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -130,25 +129,24 @@ body {
 .app-container {
     width: 100%;
     max-width: 1100px;
-    margin: 2rem;
+    margin: 1rem auto;
     background: var(--card-glass);
     border: 1px solid var(--card-border);
     border-radius: 28px;
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-    padding: 2.5rem;
+    padding: 2rem;
     opacity: 0;
     transform: scale(0.96);
-    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
+    transition: opacity 1s ease, transform 1s ease;
 }
 
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
     gap: 1rem;
 }
@@ -166,22 +164,20 @@ header {
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 14px;
     padding: 8px;
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
 }
 
 .brand-title h1 {
     font-size: 1.8rem;
     font-weight: 700;
-    letter-spacing: -0.5px;
 }
 
-.brand-title p {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-top: 2px;
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
-/* Side Bill Invoice Trigger Button */
 .btn-bill-drawer {
     display: flex;
     align-items: center;
@@ -202,7 +198,6 @@ header {
     transform: translateY(-2px);
 }
 
-/* Animated Tab */
 .tab-group {
     position: relative;
     display: flex;
@@ -215,14 +210,14 @@ header {
 .tab-btn {
     position: relative;
     z-index: 2;
-    padding: 0.6rem 1.4rem;
+    padding: 0.6rem 1.2rem;
     border: none;
     background: transparent;
     color: var(--text-muted);
     font-weight: 600;
     font-size: 0.85rem;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color 0.3s;
 }
 
 .tab-btn.active { color: #fff; }
@@ -232,12 +227,10 @@ header {
     top: 4px; bottom: 4px; left: 4px;
     border-radius: 12px;
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.8), rgba(59, 130, 246, 0.8));
-    box-shadow: 0 4px 15px var(--primary-glow);
-    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: all 0.4s ease;
     z-index: 1;
 }
 
-/* Form Controls */
 .form-card {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--card-border);
@@ -262,6 +255,7 @@ header {
 }
 
 .input-control {
+    width: 100%;
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--card-border);
     padding: 0.8rem 1rem;
@@ -269,27 +263,20 @@ header {
     color: #fff;
     outline: none;
     font-size: 0.95rem;
-    transition: all 0.3s ease;
+    transition: all 0.3s;
 }
 
 .input-control:focus {
     border-color: var(--primary-accent);
     box-shadow: 0 0 0 3px var(--primary-glow);
-    background: rgba(0, 0, 0, 0.4);
 }
 
-/* Dynamic Item Rows */
 .item-row {
     display: grid;
-    grid-template-columns: 2fr 1.5fr 1fr 44px;
+    grid-template-columns: 2fr 1fr 1.2fr 44px;
     gap: 0.8rem;
     align-items: center;
     margin-bottom: 0.8rem;
-}
-
-@media (max-width: 650px) {
-    .item-row { grid-template-columns: 1fr 1fr; }
-    .btn-remove-row { grid-column: span 2; }
 }
 
 .btn-add-row {
@@ -303,15 +290,8 @@ header {
     font-size: 0.85rem;
     width: 100%;
     margin-bottom: 1.2rem;
-    transition: all 0.2s;
 }
 
-.btn-add-row:hover {
-    background: rgba(99, 102, 241, 0.15);
-    border-color: var(--primary-accent);
-}
-
-/* Dustbin / Trash Can Button */
 .btn-remove-row, .btn-delete {
     background: rgba(244, 63, 94, 0.1);
     border: 1px solid rgba(244, 63, 94, 0.25);
@@ -329,7 +309,6 @@ header {
 .btn-remove-row:hover, .btn-delete:hover {
     background: var(--danger);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4);
 }
 
 .btn-submit {
@@ -341,17 +320,9 @@ header {
     font-weight: 600;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 20px var(--primary-glow);
     width: 100%;
 }
 
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 25px var(--primary-glow);
-}
-
-/* Search Filter Input Bar */
 .search-box-wrapper {
     position: relative;
     margin-bottom: 1.2rem;
@@ -365,15 +336,7 @@ header {
     border-radius: 14px;
     color: #fff;
     height: 46px;
-    font-size: 0.9rem;
     outline: none;
-    transition: all 0.3s;
-}
-
-.search-input:focus {
-    border-color: var(--accent-cyan);
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
-    background: rgba(0, 0, 0, 0.3);
 }
 
 .search-icon {
@@ -382,18 +345,12 @@ header {
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
-    pointer-events: none;
 }
 
-/* Dashboard & Item Cards */
 .content-area {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 2rem;
-}
-
-@media (max-width: 850px) {
-    .content-area { grid-template-columns: 1fr; }
 }
 
 .entry-card {
@@ -405,25 +362,11 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    animation: slideUp 0.4s ease-out forwards;
 }
 
-.entry-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateX(4px);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.entry-info { display: flex; flex-direction: column; gap: 4px; }
 .entry-title { font-weight: 600; font-size: 1.05rem; }
-.entry-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 12px; align-items: center; }
-.entry-tag { background: rgba(255, 255, 255, 0.06); padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; }
+.entry-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 8px; margin-top: 4px; }
+.entry-tag { background: rgba(255, 255, 255, 0.05); padding: 2px 8px; border-radius: 6px; }
 .price-amount { font-size: 1.1rem; font-weight: 700; color: #fff; margin-right: 1rem; }
 
 .summary-card {
@@ -444,11 +387,21 @@ header {
     border-radius: 14px;
 }
 
-.stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
-.stat-val { font-size: 1.8rem; font-weight: 700; margin-top: 4px; background: linear-gradient(135deg, #fff, var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.9rem; }
+.stat-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); }
 
-/* --- Side Drawer Invoice Panel --- */
+.stat-val { 
+    font-size: 1.8rem; 
+    font-weight: 700; 
+    margin-top: 4px; 
+    background: linear-gradient(135deg, #fff, var(--text-muted)); 
+    background-clip: text;
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+}
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+
+/* Invoice Drawer */
 .invoice-drawer-overlay {
     position: fixed;
     inset: 0;
@@ -460,14 +413,11 @@ header {
     transition: all 0.4s ease;
 }
 
-.invoice-drawer-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
+.invoice-drawer-overlay.active { opacity: 1; visibility: visible; }
 
 .invoice-drawer {
     position: fixed;
-    top: 0; right: -420px;
+    top: 0; right: -100%;
     width: 100%; max-width: 420px;
     height: 100vh;
     background: #0f0e17;
@@ -477,38 +427,20 @@ header {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.6);
+    transition: right 0.4s ease;
 }
 
 .invoice-drawer.active { right: 0; }
 
-.drawer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
+.drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 
-/* Fixed Close SVG Icon */
 .btn-close-drawer {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--card-border);
     color: var(--text-muted);
     border-radius: 10px;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 36px; height: 36px;
     cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-close-drawer:hover {
-    background: rgba(244, 63, 94, 0.15);
-    color: var(--danger);
-    border-color: rgba(244, 63, 94, 0.3);
 }
 
 .btn-generate-pdf {
@@ -519,13 +451,9 @@ header {
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-    transition: all 0.3s;
 }
 
-.btn-generate-pdf:hover { transform: translateY(-2px); }
-
-/* PDF Invoice Printable Template */
+/* Printable PDF Invoice CSS */
 #pdfTemplate {
     display: none;
     background: #ffffff;
@@ -557,3 +485,29 @@ header {
 }
 
 .pdf-table th { background: #f8fafc; color: #475569; }
+
+/* Responsive Queries */
+@media (max-width: 850px) {
+    .content-area { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 650px) {
+    body { padding: 0.5rem; }
+    .app-container { padding: 1.2rem; border-radius: 20px; }
+    header { flex-direction: column; align-items: stretch; }
+    .header-actions { justify-content: space-between; }
+    .btn-bill-drawer, .tab-group { flex: 1; }
+    .tab-btn { flex: 1; text-align: center; }
+    
+    .item-row {
+        grid-template-columns: 1fr;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 0.8rem;
+        border-radius: 14px;
+        border: 1px solid var(--card-border);
+    }
+    
+    .btn-remove-row { width: 100%; margin-top: 0.3rem; }
+    .entry-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .invoice-drawer { max-width: 100%; }
+}
