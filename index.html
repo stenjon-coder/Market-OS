@@ -1,187 +1,319 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Market OS</title>
     
-    <!-- App Meta Tags (Full Screen Settings) -->
+    <!-- PWA & Mobile Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#08070b">
+    <meta name="theme-color" content="#090a0f">
     
-    <!-- PWA Manifest File -->
     <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- html2pdf JS Library -->
+    <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Ambient Animated Mesh Background -->
-    <div class="ambient-bg">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
+    <!-- Dynamic Glow Background -->
+    <div class="glow-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
     </div>
 
-    <!-- 3D Loader Screen -->
+    <!-- App Loader -->
     <div id="loader">
-        <div class="bag-3d-wrapper">
-            <div class="bag-3d">
-                <div class="bag-handle"></div>
-                <div class="bag-body"></div>
-            </div>
+        <div class="loader-ring">
+            <div></div><div></div><div></div><div></div>
         </div>
-        <div class="loader-logo">MARKET OS</div>
+        <div class="loader-title">MARKET<span>OS</span></div>
     </div>
 
     <!-- Main App Container -->
-    <div class="app-container" id="appContainer">
+    <div class="app-layout" id="appContainer">
         
-        <!-- Header Section -->
-        <header>
-            <div class="logo-box">
-                <svg class="brand-logo-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
-                    <path d="M3 6h18"/>
-                    <path d="M16 10a4 4 0 0 1-8 0"/>
-                </svg>
-                <div class="brand-title">
-                    <h1>Market OS</h1>
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                </div>
+                <div>
+                    <h2>Market OS</h2>
+                    <span class="version-badge">ULTIMATE v3.0</span>
                 </div>
             </div>
 
-            <div class="header-actions">
-                <button class="btn-bill-drawer" onclick="toggleDrawer(true)">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                    <span>Bill / PDF Invoice</span>
+            <!-- Header Top Actions -->
+            <div class="header-right">
+                <!-- Currency Selector -->
+                <select id="currencySelect" class="pill-select" onchange="changeCurrency(this.value)">
+                    <option value="₹">₹ INR</option>
+                    <option value="৳">৳ BDT</option>
+                    <option value="$">$ USD</option>
+                    <option value="€">€ EUR</option>
+                </select>
+
+                <!-- Auth Button -->
+                <button id="authBtn" class="btn-secondary" onclick="toggleAuthModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span id="userAuthName">Sign In / Sync</span>
                 </button>
 
-                <div class="tab-group" id="tabGroup">
-                    <div class="tab-indicator" id="tabIndicator"></div>
-                    <button class="tab-btn active" onclick="switchTab(this, 'all')">All Notes</button>
-                    <button class="tab-btn" onclick="switchTab(this, 'today')">Today</button>
-                </div>
+                <!-- PDF Drawer Trigger -->
+                <button class="btn-drawer-trigger" onclick="toggleDrawer(true)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+                    <span>Invoices</span>
+                </button>
             </div>
         </header>
 
-        <!-- New Entry Form Card -->
-        <section class="form-card">
-            <div class="input-group">
-                <label>Customer / Store Name</label>
-                <input type="text" id="customerName" class="input-control" placeholder="e.g. Agora Mall / John Doe">
-            </div>
-
-            <div id="itemsContainer">
-                <div class="item-row">
-                    <input type="text" class="input-control item-name" placeholder="Item description (e.g. Rice)">
-                    <input type="text" class="input-control item-qty" placeholder="Qty (e.g. 2 kg / 1 pc)" value="1 Pcs">
-                    <input type="number" step="0.01" class="input-control item-price" placeholder="Price (₹)">
-                    <button class="btn-remove-row" onclick="removeRow(this)">✕</button>
+        <!-- Main Workspace Grid -->
+        <main class="workspace">
+            
+            <!-- Editor Panel (Left Side) -->
+            <section class="panel editor-panel">
+                <div class="panel-header">
+                    <h3>New Transaction Entry</h3>
+                    <span class="status-dot"></span>
                 </div>
-            </div>
 
-            <button class="btn-add-row" onclick="addItemRow()">+ Add Another Item</button>
-            <button class="btn-submit" onclick="saveEntry()">Save Record</button>
-        </section>
-
-        <!-- Search Bar -->
-        <div class="search-box-wrapper">
-            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="searchInput" class="search-input" placeholder="Search entries..." onkeyup="filterEntries()">
-        </div>
-
-        <!-- Content Area -->
-        <div class="content-area">
-            <!-- Entries List -->
-            <div id="entriesList">
-                <div class="empty-state">No records found. Add your first entry above!</div>
-            </div>
-
-            <!-- Total Summary Card -->
-            <div class="summary-card">
-                <div class="stat-box">
-                    <div class="stat-label">Total Amount</div>
-                    <div class="stat-val" id="grandTotal">₹0.00</div>
+                <!-- Customer Details -->
+                <div class="form-row">
+                    <div class="form-group flex-2">
+                        <label>Customer / Store Name</label>
+                        <input type="text" id="customerName" class="modern-input" placeholder="e.g. Metro Mart / Rahul Roy">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label>Phone (WhatsApp)</label>
+                        <input type="tel" id="customerPhone" class="modern-input" placeholder="+91 9876543210">
+                    </div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-label">Total Entries</div>
-                    <div class="stat-val" id="totalEntriesCount">0</div>
+
+                <!-- Payment Status & Category Tag -->
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label>Payment Status</label>
+                        <select id="paymentStatus" class="modern-input">
+                            <option value="Paid">✅ Paid (পরিশোধিত)</option>
+                            <option value="Unpaid">❌ Unpaid (বকেয়া)</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label>Category Tag</label>
+                        <select id="categoryTag" class="modern-input">
+                            <option value="Grocery">🛒 Grocery</option>
+                            <option value="Pharmacy">💊 Pharmacy</option>
+                            <option value="Electronics">⚡ Electronics</option>
+                            <option value="Clothing">👕 Clothing</option>
+                            <option value="General">📦 General</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-        </div>
+
+                <!-- Dynamic Itemized List -->
+                <div class="items-header">
+                    <label>Items & Pricing List</label>
+                    <button class="btn-text-action" onclick="addItemRow()">+ Add Item</button>
+                </div>
+
+                <div id="itemsContainer" class="items-list">
+                    <div class="item-row">
+                        <input type="text" class="modern-input item-name" placeholder="Item Description">
+                        <input type="text" class="modern-input item-qty" placeholder="Qty" value="1 Pcs">
+                        <input type="number" step="0.01" class="modern-input item-price" placeholder="Price" oninput="calculateSubtotal()">
+                        <button class="btn-icon-danger" onclick="removeRow(this)">✕</button>
+                    </div>
+                </div>
+
+                <!-- GST & Discount Calculation Section -->
+                <div class="calc-box">
+                    <div class="form-row align-center">
+                        <div class="form-group flex-1">
+                            <label>Discount (%)</label>
+                            <input type="number" id="discountPercent" class="modern-input" value="0" min="0" max="100" oninput="calculateSubtotal()">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>GST Tax (%)</label>
+                            <select id="gstRate" class="modern-input" onchange="calculateSubtotal()">
+                                <option value="0">0% (None)</option>
+                                <option value="5">5% GST</option>
+                                <option value="12">12% GST</option>
+                                <option value="18">18% GST</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="subtotal-display">
+                        <span>Calculated Total:</span>
+                        <strong id="liveTotalDisplay"><span class="curr-symbol">₹</span>0.00</strong>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="saveEntry()">
+                    <span>Save Transaction</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+            </section>
+
+            <!-- Dashboard & History Panel (Right Side) -->
+            <section class="panel records-panel">
+                
+                <!-- Quick Dashboard Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card accent-purple">
+                        <div class="stat-info">
+                            <span class="stat-title">Total Sales/Expense</span>
+                            <h3 id="grandTotal"><span class="curr-symbol">₹</span>0.00</h3>
+                        </div>
+                        <div class="stat-icon">💰</div>
+                    </div>
+                    <div class="stat-card accent-red">
+                        <div class="stat-info">
+                            <span class="stat-title">Pending Unpaid</span>
+                            <h3 id="unpaidTotal" style="color: var(--danger);"><span class="curr-symbol">₹</span>0.00</h3>
+                        </div>
+                        <div class="stat-icon">⚠️</div>
+                    </div>
+                </div>
+
+                <!-- Visual Chart Analytics -->
+                <div class="chart-container-box">
+                    <div class="chart-header">
+                        <span>📊 Category Analytics</span>
+                        <button class="btn-text-action" onclick="toggleChartType()">Toggle Chart</button>
+                    </div>
+                    <div style="height: 180px; position: relative;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="searchInput" placeholder="Search customer or phone..." onkeyup="filterEntries()">
+                    </div>
+                    <div class="tab-pills">
+                        <button class="pill active" onclick="switchTab(this, 'all')">All</button>
+                        <button class="pill" onclick="switchTab(this, 'today')">Today</button>
+                        <button class="pill" onclick="switchTab(this, 'unpaid')">Unpaid</button>
+                    </div>
+                </div>
+
+                <!-- Transaction List Area -->
+                <div id="entriesList" class="entries-scroll-area"></div>
+            </section>
+        </main>
     </div>
 
-    <!-- Bill Drawer Side Panel Overlay -->
-    <div class="invoice-drawer-overlay" id="drawerOverlay" onclick="toggleDrawer(false)"></div>
-    
-    <!-- Bill Drawer Side Panel -->
-    <div class="invoice-drawer" id="invoiceDrawer">
-        <div>
-            <div class="drawer-header">
-                <h3>Generate Bill PDF</h3>
-                <button class="btn-close-drawer" onclick="toggleDrawer(false)">✕</button>
-            </div>
-            <div class="input-group">
-                <label>Select Record for Bill</label>
-                <select id="billSelect" class="input-control" onchange="previewBill()">
+    <!-- Invoice Drawer Slide-Out -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer(false)"></div>
+    <div class="drawer" id="invoiceDrawer">
+        <div class="drawer-top">
+            <h3>Invoice & Sharing Center</h3>
+            <button class="btn-icon-close" onclick="toggleDrawer(false)">✕</button>
+        </div>
+        
+        <div class="drawer-body">
+            <div class="form-group">
+                <label>Select Bill Entry</label>
+                <select id="billSelect" class="modern-input" onchange="previewBill()">
                     <option value="">-- Choose Entry --</option>
                 </select>
             </div>
-            <div id="drawerPreview" style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
-                Select an entry above to view invoice summary.
+            
+            <div id="drawerPreview" class="receipt-preview-box">
+                <p>Choose an entry to preview receipt and sharing options.</p>
             </div>
         </div>
 
-        <button class="btn-generate-pdf" onclick="downloadPDF()">Download Professional PDF Invoice</button>
+        <div class="drawer-footer">
+            <div class="action-grid">
+                <button class="btn-success" onclick="downloadPDF()">Save PDF</button>
+                <button class="btn-whatsapp" onclick="shareWhatsApp()">WhatsApp</button>
+                <button class="btn-pos" onclick="printThermalPOS()">POS Print</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Printable PDF Template -->
+    <!-- Firebase Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="toggleAuthModal()">&times;</span>
+            <h3>Cloud Sync & Auth</h3>
+            <p style="color:var(--text-secondary); font-size:0.85rem; margin-top:5px;">Connect Cloud database to sync across all your devices.</p>
+            
+            <div style="margin-top:20px; display:flex; flex-direction:column; gap:12px;">
+                <button class="btn-primary" onclick="loginGoogle()">Sign In with Google</button>
+                <button class="btn-secondary" onclick="logoutFirebase()">Logout / Offline Mode</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Printable Template -->
     <div id="pdfTemplate">
         <div class="pdf-header">
             <div>
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                    <h1 style="font-size: 1.4rem; color: #0f172a; margin: 0;">MARKET OS</h1>
-                </div>
-                <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Official Purchase & Procurement Statement</p>
+                <h1 style="font-size: 1.6rem; color: #4f46e5; margin: 0; font-weight: 800;">MARKET OS</h1>
+                <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Tax Invoice & Official Statement</p>
             </div>
             <div style="text-align: right;">
-                <h2 style="font-size: 1.2rem; color: #6366f1; margin: 0;">INVOICE</h2>
+                <h2 style="font-size: 1.2rem; color: #0f172a; margin: 0;">TAX INVOICE</h2>
                 <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;" id="pdfInvoiceMeta">Date: --</p>
+                <span id="pdfStatusBadge" style="display:inline-block; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; margin-top: 6px;">--</span>
             </div>
+        </div>
+
+        <div style="margin-bottom: 20px; font-size: 0.9rem; color: #334155;">
+            <p><strong>Customer:</strong> <span id="pdfCustomerName">--</span></p>
+            <p><strong>Phone:</strong> <span id="pdfCustomerPhone">--</span></p>
+            <p><strong>Category:</strong> <span id="pdfCategory">General</span></p>
         </div>
 
         <table class="pdf-table">
             <thead>
                 <tr>
                     <th>Item Description</th>
-                    <th>Customer / Store</th>
-                    <th>Quantity</th>
+                    <th>Qty</th>
                     <th style="text-align: right;">Price</th>
                 </tr>
             </thead>
             <tbody id="pdfTableBody"></tbody>
         </table>
 
-        <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px;">
             <div>
-                <p style="font-size: 0.8rem; color: #94a3b8;">Authorized Signatory</p>
-                <div style="margin-top: 35px; border-bottom: 1px solid #cbd5e1; width: 140px;"></div>
+                <p style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Authorized Signature</p>
+                <div style="margin-top: 30px; border-bottom: 2px solid #cbd5e1; width: 140px;"></div>
             </div>
             <div style="text-align: right;">
-                <p style="font-size: 0.9rem; color: #64748b;">Total Amount Paid:</p>
-                <h2 style="font-size: 1.8rem; color: #0f172a;" id="pdfGrandTotal">₹0.00</h2>
+                <p style="font-size: 0.8rem; color: #64748b;" id="pdfCalculations">Discount: 0% | GST: 0%</p>
+                <h2 style="font-size: 1.8rem; color: #4f46e5; margin-top: 4px;" id="pdfGrandTotal">₹0.00</h2>
             </div>
         </div>
     </div>
 
     <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('ServiceWorker registered:', reg);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
